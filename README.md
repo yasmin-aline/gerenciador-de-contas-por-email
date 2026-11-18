@@ -52,7 +52,7 @@ apelidos.json "energia" -> "luz" etc. (copie junto com o jar)
 1. Envie o `.xlsx` ao Drive, abra e use **Arquivo > Salvar como Planilha Google**.
 2. Em **Arquivo > Configurações**, ponha a localidade em **Brasil** (o programa lê "R$ 1.234,56").
 3. Confira se o **Resumo** dá os mesmos totais do Excel.
-4. A coluna **Pago?** tem as opções `✅ Pago`, `⏳ Pendente` e `❌ Não pago`. O programa grava exatamente esses textos (`✅ Pago` ao dar baixa, `⏳ Pendente` em conta nova) e lê `Pago`/`Pendente` sem emoji também. Se você mudar o texto das opções, ajuste `Status.java`.
+4. A coluna **Pago?** é uma lista com as opções Pago, Pendente e Não pago. O programa grava os textos exatamente como estão definidos em `Status.java` (`PAGO` ao dar baixa, `PENDENTE` em conta nova) e também lê "Pago" e "Pendente" sem nenhum ícone na frente. Se o texto das opções da sua lista for diferente, ajuste `Status.java`.
 5. Copie o ID da planilha: o trecho da URL entre `/d/` e `/edit`.
 
 ### 2. Google Cloud (Sheets API e, para o anexo, Drive API)
@@ -69,12 +69,12 @@ A Gmail API **não** é necessária: o e-mail usa IMAP/SMTP com senha de app, qu
 
 ### 4. Chave da IA (Gemini)
 1. Em aistudio.google.com/apikey, crie uma chave nova só para este projeto.
-2. Ponha em `GEMINI_API_KEY` no `.env`. Em `GEMINI_MODEL`, use um modelo que a sua chave consiga usar (o do seu outro projeto serve); o padrão é `gemini-flash-latest`.
+2. Ponha em `GEMINI_API_KEY` no `.env`. Em `GEMINI_MODEL`, use um modelo que a sua chave consiga usar; o padrão é `gemini-flash-latest`.
 Se o Gemini responder 503 ("alta demanda") ou 429, o programa tenta de novo 3 vezes, esperando 3 s e depois 6 s. Se continuar, usa o modelo em `GEMINI_MODEL_FALLBACK`, caso você tenha configurado um.
 3. Para escolher o modelo mais rápido da sua chave, rode `java -jar target/gerenciadordecontas.jar ia-modelos`: ele lista os modelos que a chave pode usar, mede o tempo de cada um e sugere o que pôr em `GEMINI_MODEL`.
 4. Teste sem mexer na planilha: `java -jar target/gerenciadordecontas.jar ia "paguei a luz, 210"`. Ele mostra o que a IA entendeu.
 
-Atenção: na camada gratuita do Gemini, o Google pode usar o conteúdo enviado para melhorar os produtos dele. Aqui vão só as suas respostas ("paguei a luz, 210") e os nomes das contas do mês, nunca a planilha inteira. Se isso incomodar, ative o faturamento no projeto do Google ou use `ANTHROPIC_API_KEY` no lugar (pago, centavos por mês).
+Atenção: na camada gratuita do Gemini, o Google pode usar o conteúdo enviado para melhorar os produtos dele. Aqui vão só as respostas ("paguei a luz, 210") e os nomes das contas do mês, nunca a planilha inteira. Se isso incomodar, ative o faturamento no projeto do Google ou use `ANTHROPIC_API_KEY` no lugar (pago, centavos por mês).
 
 Sem nenhuma chave, os avisos funcionam, mas as respostas em texto livre não.
 
@@ -118,14 +118,14 @@ O agendador usa `javaw.exe` (sem janela) com a pasta `C:\GerenciadorDeContas` co
 
 - Abas de mês `Jan` a `Dez`; blocos nas colunas A-C (Dia 15) e E-G (Fim do mês).
 - Vagas nas linhas 5-9 (Jan a Abr), 4-7 (Mai) e 4-8 (Jun a Dez). O programa acha cada conta **pelo nome** dentro dessas linhas e nunca lê os totais e as anotações abaixo. Se o seu layout tiver outra faixa, ajuste `MesLayout.vagas`.
-- **Saldo previsto** = entradas (R$ 2.200 + R$ 1.800, ajustáveis no `.env`) − soma de todas as contas do mês. Compare com o seu Resumo; se a fórmula for outra, é só ajustar em `AvisoComposer` (`aviso/`).
+- **Saldo previsto** = entradas (o que entra no dia 15 + o que entra no fim do mês, definidos em `RECEBE_DIA15` e `RECEBE_FIM_MES` no `.env`) − soma de todas as contas do mês. Compare com o Resumo da planilha; se a fórmula for outra, é só ajustar em `AvisoComposer` (`aviso/`).
 - A planilha **não tem coluna de vencimento**, então "vence dia 20" é entendido mas não gravado: o vencimento vem do bloco (dia 15 ou fim do mês).
 - Apelidos ("energia" para "Conta de Luz") ficam em `apelidos.json`.
 
 ## Segurança
 
 - O bot só obedece ao e-mail em `DESTINATARIO_EMAIL`; mensagens de outros remetentes são ignoradas.
-- Chaves ficam só no `.env` e em `secrets/`, nunca no código. Se o repositório for público, use uma planilha de exemplo, sem seus dados.
+- Chaves ficam só no `.env` e em `secrets/`, nunca no código. Não suba esses arquivos para o repositório (o `.gitignore` já os exclui).
 - O texto das suas respostas vai para a API de IA (Gemini) só para extrair conta, valor e ação.
 
 ## Observação sobre as dependências
