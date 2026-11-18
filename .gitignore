@@ -1,0 +1,13 @@
+target/
+.env
+secrets/
+*service-account*.json
+*credentials*.json
+client_secret*.json
+gerenciadordecontas.log
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
